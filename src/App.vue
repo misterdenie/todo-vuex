@@ -1,17 +1,55 @@
 <template>
   <div id="app">
-    <img alt="Vue logo" src="./assets/logo.png">
-    <HelloWorld msg="Welcome to Your Vue.js App"/>
+     <TodoList :items="sortedItem" @onItemDone="done"></TodoList>
+     <InputFrom  @onSave="save"></InputFrom>
   </div>
 </template>
 
 <script>
-import HelloWorld from './components/HelloWorld.vue'
 
+import TodoList from '@/components/TodoList'
+import InputFrom from '@/components/InputFrom'
+import { mapState, mapMutations } from "vuex";
 export default {
   name: 'app',
   components: {
-    HelloWorld
+    TodoList,
+    InputFrom
+  },
+  
+  mounted (){
+    this.initItem(JSON.parse(localStorage['todoItems']))
+  },
+  computed: {
+    ...mapState(['items']),
+    sortedItem(){
+      return this.items.sort((a,b) => {
+        return b.time - a.time
+      }).filter(ele => {
+        return ele.completed === false
+      })
+    }
+  },
+  methods:{
+    ...mapMutations(['addItem','initItem']),
+    done(id){
+      this.items = this.items.map(ele => {
+        if (id === ele.time){
+          ele.completed = true
+        }
+        return ele
+      })
+       this.initItem(JSON.parse(localStorage['todoItems']))
+    },
+    
+    save(text){
+      this.addItem({
+        text: text,
+        time: Date.now(),
+        completed: false
+      })
+      
+    }
   }
 }
 </script>
